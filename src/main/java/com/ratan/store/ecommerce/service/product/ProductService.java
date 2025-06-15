@@ -1,6 +1,6 @@
 package com.ratan.store.ecommerce.service.product;
 
-import com.ratan.store.ecommerce.exceptions.ProductNotFoundException;
+import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Category;
 import com.ratan.store.ecommerce.model.Product;
 import com.ratan.store.ecommerce.repository.CategoryRepository;
@@ -48,14 +48,14 @@ public class ProductService  implements IProductService {
     @Override
     public Product getProductById(Long id) {
         return repository.findById(id).orElseThrow(
-                ()->new ProductNotFoundException("Product not found!"));
+                ()->new ResourceNotFoundException("Product not found!"));
     }
 
     @Override
     public void deleteProductById(Long id) {
         repository.findById(id).ifPresentOrElse(repository::delete,
                 ()-> {
-                    throw new ProductNotFoundException("Product not found!");
+                    throw new ResourceNotFoundException("Product not found!");
                 });
     }
 
@@ -65,7 +65,7 @@ public class ProductService  implements IProductService {
         return productRepository.findById(id)
                         .map(exsitingProduct -> updateProduct(exsitingProduct, product))
                 .map(productRepository::save)
-                .orElseThrow(()->new ProductNotFoundException("Product not found!"));
+                .orElseThrow(()->new ResourceNotFoundException("Product not found!"));
     }
     private Product updateProduct(Product product, ProductsUpdateRequest request) {
         product.setName(request.getName());
