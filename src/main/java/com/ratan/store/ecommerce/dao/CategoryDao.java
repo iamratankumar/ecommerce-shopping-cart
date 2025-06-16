@@ -1,10 +1,10 @@
-package com.ratan.store.ecommerce.repository;
+package com.ratan.store.ecommerce.dao;
 
 import com.ratan.store.ecommerce.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface CategoryDao extends JpaRepository<Category, Long> {
 
 
     Category findByName(String name);

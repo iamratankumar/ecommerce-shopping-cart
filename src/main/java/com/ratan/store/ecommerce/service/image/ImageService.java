@@ -3,8 +3,7 @@ package com.ratan.store.ecommerce.service.image;
 import com.ratan.store.ecommerce.dto.ImageDTO;
 import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Image;
-import com.ratan.store.ecommerce.model.Product;
-import com.ratan.store.ecommerce.repository.ImageRepository;
+import com.ratan.store.ecommerce.dao.ImageDao;
 import com.ratan.store.ecommerce.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,27 +18,27 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ImageService implements IImageService {
-    private final ImageRepository imageRepository;
+    private final ImageDao imageDao;
     private final IProductService productService;
 
 
     @Override
     public Image getImageById(Long id) {
-        return imageRepository.findById(id).orElseThrow(
+        return imageDao.findById(id).orElseThrow(
                 ()-> new ResourceNotFoundException("No image found with id: "+id)
         );
     }
 
     @Override
     public void deleteImageById(Long id) {
-        imageRepository.findById(id).ifPresentOrElse(imageRepository::delete,
+        imageDao.findById(id).ifPresentOrElse(imageDao::delete,
                 () -> {throw new ResourceNotFoundException("No image found with id: "+id);});
     }
 
     @Override
     public List<ImageDTO> saveImages(List<MultipartFile> image, Long productId) {
-        Product product = productService.getProductById(productId);
-        List<ImageDTO> savedImagseDTOList = new ArrayList<>();
+        var product = productService.getProductById(productId);
+        List<ImageDTO> savedImagesDTOList = new ArrayList<>();
 
         for (MultipartFile file : image) {
             try {
@@ -53,21 +52,21 @@ public class ImageService implements IImageService {
 
                 String downloadUrl = baseURL+img.getId();
                 img.setDownloadUrl(downloadUrl);
-                Image savedImg = imageRepository.save(img);
+                Image savedImg = imageDao.save(img);
                 savedImg.setDownloadUrl(baseURL+savedImg.getId());
-                imageRepository.save(savedImg);
+                imageDao.save(savedImg);
 
                 ImageDTO dto = new ImageDTO();
-                dto.setImageId(savedImg.getId());
-                dto.setImageName(savedImg.getFileName());
+                dto.setId(savedImg.getId());
+                dto.setFileName(savedImg.getFileName());
                 dto.setDownloadUrl(savedImg.getDownloadUrl());
-                savedImagseDTOList.add(dto);
+                savedImagesDTOList.add(dto);
 
             }catch (IOException | SQLException e){
                 throw new  ResourceNotFoundException(e.getMessage());
             }
         }
-        return savedImagseDTOList;
+        return savedImagesDTOList;
     }
 
     @Override
@@ -77,7 +76,7 @@ public class ImageService implements IImageService {
             //imageEntity.setFileName(image.getOriginalFilename());
             imageEntity.setFileName(image.getOriginalFilename());
             imageEntity.setImage(new SerialBlob(image.getBytes()));
-            imageRepository.save(imageEntity);
+            imageDao.save(imageEntity);
         }catch (IOException | SQLException e){
             throw new RuntimeException(e.getMessage());
         }

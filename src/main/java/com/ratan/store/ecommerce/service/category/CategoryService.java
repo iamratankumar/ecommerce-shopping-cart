@@ -3,7 +3,7 @@ package com.ratan.store.ecommerce.service.category;
 import com.ratan.store.ecommerce.exceptions.AlreadyExistsException;
 import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Category;
-import com.ratan.store.ecommerce.repository.CategoryRepository;
+import com.ratan.store.ecommerce.dao.CategoryDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,27 +13,27 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CategoryService implements ICategoryService{
-    private final CategoryRepository categoryRepository;
+    private final CategoryDao categoryDao;
     @Override
     public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
+        return categoryDao.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Category not found!"));
     }
 
     @Override
     public Category getCategoryByName(String name) {
-        return categoryRepository.findByName(name);
+        return categoryDao.findByName(name);
     }
 
     @Override
     public List<Category> findAllCategories() {
-        return categoryRepository.findAll();
+        return categoryDao.findAll();
     }
 
     @Override
     public Category addCategory(Category category) {
-        return Optional.of(category).filter(c-> !categoryRepository.existsByName(c.getName()))
-                .map(categoryRepository::save).orElseThrow(()-> new AlreadyExistsException(category.getName()+ " already exists"));
+        return Optional.of(category).filter(c-> !categoryDao.existsByName(c.getName()))
+                .map(categoryDao::save).orElseThrow(()-> new AlreadyExistsException(category.getName()+ " already exists"));
     }
 
     @Override
@@ -41,14 +41,14 @@ public class CategoryService implements ICategoryService{
         return Optional.ofNullable(getCategoryById(id))
                 .map(oldCategory ->{
                     oldCategory.setName(category.getName());
-                    return categoryRepository.save(oldCategory);
+                    return categoryDao.save(oldCategory);
                 }).orElseThrow(()-> new ResourceNotFoundException("Category not found!"));
     }
 
     @Override
     public void deleteCategory(Long id) {
-        categoryRepository.findById(id)
-                .ifPresentOrElse(categoryRepository::delete, () -> {
+        categoryDao.findById(id)
+                .ifPresentOrElse(categoryDao::delete, () -> {
                     throw new ResourceNotFoundException("Category not found!");
                 });
     }

@@ -1,5 +1,6 @@
 package com.ratan.store.ecommerce.service.product;
 
+import com.ratan.store.ecommerce.dto.ProductDTO;
 import com.ratan.store.ecommerce.model.Product;
 import com.ratan.store.ecommerce.request.AddProductRequest;
 import com.ratan.store.ecommerce.request.ProductsUpdateRequest;
@@ -21,4 +22,8 @@ public interface IProductService {
     List<Product> getProductByName(String productName);
     List<Product> getProductByBrandAndName(String brand, String productName);
     Long countProductByBrandAndName(String brand, String productName);
+
+    ProductDTO convertToDTO(Product product);
+
+    List<ProductDTO> convertToDTOList(List<Product> productList);
 }

@@ -36,7 +36,7 @@ public class ImageController {
         }
     }
 
-    @GetMapping("/images/download/{imageId}")
+    @GetMapping("/download/{imageId}")
     public ResponseEntity<Resource> downloadImage(@PathVariable Long imageId) throws SQLException {
         Image image = imageService.getImageById(imageId);
 
@@ -48,7 +48,7 @@ public class ImageController {
 
     }
 
-    @PutMapping("/image/{imageId}/update")
+    @PutMapping("/update/{imageId}")
     public ResponseEntity<ApiResponse> updateImage(@PathVariable Long imageId,@RequestBody MultipartFile file) {
         try {
             Image image = imageService.getImageById(imageId);
@@ -66,7 +66,7 @@ public class ImageController {
         );
     }
 
-    @DeleteMapping("/image/{imageId}/delete")
+    @DeleteMapping("/delete/{imageId}")
     public ResponseEntity<ApiResponse> deleteImage(@PathVariable Long imageId) {
         try {
             Image image = imageService.getImageById(imageId);

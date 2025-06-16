@@ -1,5 +1,6 @@
 package com.ratan.store.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,6 @@ import java.util.List;
 @Entity
 public class Product {
     @Id
-
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
@@ -26,6 +26,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @JsonIgnore
     @OneToMany(mappedBy =  "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
