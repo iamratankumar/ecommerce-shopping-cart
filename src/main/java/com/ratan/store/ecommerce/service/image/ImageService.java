@@ -3,7 +3,7 @@ package com.ratan.store.ecommerce.service.image;
 import com.ratan.store.ecommerce.dto.ImageDTO;
 import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Image;
-import com.ratan.store.ecommerce.dao.ImageDao;
+import com.ratan.store.ecommerce.repository.ImageRepository;
 import com.ratan.store.ecommerce.service.product.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,20 +18,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ImageService implements IImageService {
-    private final ImageDao imageDao;
+    private final ImageRepository imageRepository;
     private final IProductService productService;
 
 
     @Override
     public Image getImageById(Long id) {
-        return imageDao.findById(id).orElseThrow(
+        return imageRepository.findById(id).orElseThrow(
                 ()-> new ResourceNotFoundException("No image found with id: "+id)
         );
     }
 
     @Override
     public void deleteImageById(Long id) {
-        imageDao.findById(id).ifPresentOrElse(imageDao::delete,
+        imageRepository.findById(id).ifPresentOrElse(imageRepository::delete,
                 () -> {throw new ResourceNotFoundException("No image found with id: "+id);});
     }
 
@@ -52,9 +52,9 @@ public class ImageService implements IImageService {
 
                 String downloadUrl = baseURL+img.getId();
                 img.setDownloadUrl(downloadUrl);
-                Image savedImg = imageDao.save(img);
+                Image savedImg = imageRepository.save(img);
                 savedImg.setDownloadUrl(baseURL+savedImg.getId());
-                imageDao.save(savedImg);
+                imageRepository.save(savedImg);
 
                 ImageDTO dto = new ImageDTO();
                 dto.setId(savedImg.getId());
@@ -76,7 +76,7 @@ public class ImageService implements IImageService {
             //imageEntity.setFileName(image.getOriginalFilename());
             imageEntity.setFileName(image.getOriginalFilename());
             imageEntity.setImage(new SerialBlob(image.getBytes()));
-            imageDao.save(imageEntity);
+            imageRepository.save(imageEntity);
         }catch (IOException | SQLException e){
             throw new RuntimeException(e.getMessage());
         }

@@ -6,9 +6,9 @@ import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Category;
 import com.ratan.store.ecommerce.model.Image;
 import com.ratan.store.ecommerce.model.Product;
-import com.ratan.store.ecommerce.dao.CategoryDao;
-import com.ratan.store.ecommerce.dao.ImageDao;
-import com.ratan.store.ecommerce.dao.ProductDao;
+import com.ratan.store.ecommerce.repository.CategoryRepository;
+import com.ratan.store.ecommerce.repository.ImageRepository;
+import com.ratan.store.ecommerce.repository.ProductRepository;
 import com.ratan.store.ecommerce.request.AddProductRequest;
 import com.ratan.store.ecommerce.request.ProductsUpdateRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,20 +21,20 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProductService  implements IProductService {
-    private final ProductDao repository;
-    private final CategoryDao categoryDao;
-    private final ProductDao productDao;
+    private final ProductRepository repository;
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
-    private final ImageDao imageDao;
+    private final ImageRepository imageRepository;
 
     @Override
     public Product addProduct(AddProductRequest request) {
 
 
-        Category category = Optional.ofNullable(categoryDao.findByName(request.getCategory().getName()))
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
                 .orElseGet(()->{
                     Category newCategory = new Category(request.getCategory().getName());
-                    return categoryDao.save(newCategory);
+                    return categoryRepository.save(newCategory);
                 });
 
         request.setCategory(category);
@@ -69,9 +69,9 @@ public class ProductService  implements IProductService {
     @Override
     public Product updateProduct(ProductsUpdateRequest product, Long id) {
 
-        return productDao.findById(id)
+        return productRepository.findById(id)
                         .map(exsitingProduct -> updateProduct(exsitingProduct, product))
-                .map(productDao::save)
+                .map(productRepository::save)
                 .orElseThrow(()->new ResourceNotFoundException("Product not found!"));
     }
     private Product updateProduct(Product product, ProductsUpdateRequest request) {
@@ -81,7 +81,7 @@ public class ProductService  implements IProductService {
         product.setInventory(request.getInventory());
         product.setDescription(request.getDescription());
 
-        Category category = categoryDao.findByName(request.getCategory().getName());
+        Category category = categoryRepository.findByName(request.getCategory().getName());
         product.setCategory(category);
         return product;
     }
@@ -124,7 +124,7 @@ public class ProductService  implements IProductService {
     @Override
     public ProductDTO convertToDTO(Product product) {
         ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-        List<Image> imageList = imageDao.findByProductId(product.getId());
+        List<Image> imageList = imageRepository.findByProductId(product.getId());
         List<ImageDTO> imageDTOList= imageList.stream().map(
                 image-> modelMapper.map(image, ImageDTO.class))
                 .toList();

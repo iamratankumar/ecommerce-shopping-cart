@@ -2,6 +2,7 @@ package com.ratan.store.ecommerce.controller;
 
 import com.ratan.store.ecommerce.Response.ApiResponse;
 import com.ratan.store.ecommerce.dto.ImageDTO;
+import com.ratan.store.ecommerce.exceptions.ResourceNotFoundException;
 import com.ratan.store.ecommerce.model.Image;
 import com.ratan.store.ecommerce.service.image.IImageService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,13 +40,18 @@ public class ImageController {
 
     @GetMapping("/download/{imageId}")
     public ResponseEntity<Resource> downloadImage(@PathVariable Long imageId) throws SQLException {
-        Image image = imageService.getImageById(imageId);
+        try {
+            Image image = imageService.getImageById(imageId);
 
-        ByteArrayResource resource = new ByteArrayResource(image.getImage().getBytes(1, (int) image.getImage().length()));
+            ByteArrayResource resource = new ByteArrayResource(image.getImage().getBytes(1, (int) image.getImage().length()));
 
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getFileType()))
-                .header(CONTENT_DISPOSITION,
-                        "attachment; filename=\""+image.getFileName()+"\"").body(resource);
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(image.getFileType()))
+                    .header(CONTENT_DISPOSITION,
+                            "attachment; filename=\""+image.getFileName()+"\"").body(resource);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ByteArrayResource(e.getMessage().getBytes()));
+        }
 
     }
 
